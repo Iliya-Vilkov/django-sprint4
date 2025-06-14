@@ -1,4 +1,4 @@
-from datetime import datetime
+from django.utils import timezone
 from django.views.generic import (CreateView, DeleteView, DetailView,
                                   ListView, UpdateView)
 from django.shortcuts import get_object_or_404, redirect
@@ -24,7 +24,7 @@ class PostListView(ListView):
     def get_queryset(self):
         queryset = Post.objects.filter(
             is_published=True,
-            pub_date__lte=datetime.now(),
+            pub_date__lte=timezone.now(),
             category__is_published=True
         ).select_related('author').prefetch_related(
             'category', 'location').order_by('-pub_date').annotate(
@@ -44,7 +44,7 @@ class PostDetailView(DetailView):
         if (
             post.author == self.request.user
             or (post.is_published and post.category.is_published
-                and post.pub_date <= datetime.now())
+                and post.pub_date <= timezone.now())
         ):
 
             return post
@@ -145,7 +145,7 @@ class CategoryPostsView(ListView):
 
         queryset = Post.objects.filter(
             is_published=True,
-            pub_date__lte=datetime.now(),
+            pub_date__lte=timezone.now(),
             category=self.category
         ).select_related('author',
                          'category',

@@ -37,7 +37,7 @@ class Post(models.Model):
                                       verbose_name='Добавлено')
 
     image = models.ImageField(
-        upload_to='blog_images', null=True, blank=True,
+        upload_to='blogs_images', null=True, blank=True,
         verbose_name='Фото'
     )
 

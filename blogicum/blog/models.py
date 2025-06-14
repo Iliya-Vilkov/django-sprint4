@@ -36,6 +36,11 @@ class Post(models.Model):
     created_at = models.DateTimeField(auto_now_add=True,
                                       verbose_name='Добавлено')
 
+    image = models.ImageField(
+        upload_to='blog_images', null=True, blank=True,
+        verbose_name='Фото'
+    )
+
     class Meta:
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
@@ -78,6 +83,23 @@ class Location(models.Model):
     class Meta:
         verbose_name = 'местоположение'
         verbose_name_plural = 'Местоположения'
+
+    def __str__(self):
+        return self.name
+
+
+class Comment(models.Model):
+    author = models.ForeignKey(
+        User,
+        on_delete=models.CASCADE,
+        verbose_name='Автор комментария',
+        null=True
+    )
+    text = models.TextField(verbose_name='Текст')
+    created_at = models.DateTimeField(auto_now_add=True,
+                                      verbose_name='Добавлено')
+    post = models.ForeignKey(
+        Post, related_name='comments', on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name

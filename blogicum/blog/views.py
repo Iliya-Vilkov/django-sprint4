@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
-from django.urls import reverse_lazy
+from django.urls import reverse_lazy, reverse
 
 from .forms import CommentForm, PostForm, UserProfileForm
 from .models import Category, Post, Comment
@@ -193,19 +193,21 @@ class AddCommentView(LoginRequiredMixin, CreateView):
         return super().form_valid(form)
 
 
-class EditCommentView(LoginRequiredMixin, UpdateView):
-    model = Comment
-    form_class = CommentForm
-    template_name = 'blog/comment.html'
-    success_url = reverse_lazy('blog:index')
-
+class DispatchCommentMixin:
     def dispatch(self, request, *args, **kwargs):
         self.object = self.get_object()
         if self.object.author != request.user:
             raise PermissionDenied(
-                'Вы не авторизованы для редактирования этого комментария.'
+                'Авторизуйтесь для удаления этого комментария.'
             )
         return super().dispatch(request, *args, **kwargs)
+
+
+class EditCommentView(LoginRequiredMixin, DispatchCommentMixin, UpdateView):
+    model = Comment
+    form_class = CommentForm
+    template_name = 'blog/comment.html'
+    success_url = reverse_lazy('blog:index')
 
     def get_object(self, queryset=None):
         comment_id = self.kwargs.get('comment_id')
@@ -217,18 +219,10 @@ class EditCommentView(LoginRequiredMixin, UpdateView):
         return context
 
 
-class DeleteCommentView(LoginRequiredMixin, DeleteView):
+class DeleteCommentView(LoginRequiredMixin, DispatchCommentMixin, DeleteView):
     model = Comment
     template_name = 'blog/comment.html'
     pk_url_kwarg = 'comment_id'
-
-    def dispatch(self, request, *args, **kwargs):
-        self.object = self.get_object()
-        if self.object.author != request.user:
-            raise PermissionDenied(
-                'Авторизуйтесь для удаления этого комментария.'
-            )
-        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         post_id = self.kwargs.get('post_id')

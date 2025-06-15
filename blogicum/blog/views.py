@@ -107,8 +107,7 @@ class PostUpdateView(UpdateView):
             return redirect(reverse(
                 'blog:post_detail', kwargs={'post_id': self.kwargs['pk']}
             ))
-        else:
-            return super().dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
         return reverse(

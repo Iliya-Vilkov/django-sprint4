@@ -107,7 +107,7 @@ class PostUpdateView(UpdateView):
             return super().dispatch(request, *args, **kwargs)
 
     def get_success_url(self):
-        return reverse_lazy(
+        return reverse(
             'blog:post_detail', kwargs={'post_id': self.object.pk}
         )
 
@@ -168,7 +168,7 @@ class EditProfileView(LoginRequiredMixin, UpdateView):
     template_name = 'blog/user.html'
 
     def get_success_url(self):
-        return reverse_lazy(
+        return reverse(
             'blog:profile', kwargs={'username': self.object.username}
         )
 
@@ -226,7 +226,7 @@ class DeleteCommentView(LoginRequiredMixin, DispatchCommentMixin, DeleteView):
 
     def get_success_url(self):
         post_id = self.kwargs.get('post_id')
-        return reverse_lazy('blog:post_detail', kwargs={'post_id': post_id})
+        return reverse('blog:post_detail', kwargs={'post_id': post_id})
 
     def post(self, request, *args, **kwargs):
         return self.delete(request, *args, **kwargs)

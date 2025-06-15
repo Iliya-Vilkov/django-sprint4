@@ -7,7 +7,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.contrib.auth.models import User
 from django.core.exceptions import PermissionDenied
 from django.db.models import Count
-from django.urls import reverse_lazy, reverse
+from django.urls import reverse
 
 from .forms import CommentForm, PostForm, UserProfileForm
 from .models import Category, Post, Comment
@@ -78,8 +78,12 @@ class PostCreateView(LoginRequiredMixin, CreateView):
 class PostDeleteView(LoginRequiredMixin, DeleteView):
     model = Post
     template_name = 'blog/create.html'
-    success_url = reverse_lazy('blog:index')
     pk_url_kwarg = 'post_id'
+
+    def get_success_url(self):
+        return reverse(
+            'blog:profile', kwargs={'username': self.request.user.username}
+        )
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -207,7 +211,10 @@ class EditCommentView(LoginRequiredMixin, DispatchCommentMixin, UpdateView):
     model = Comment
     form_class = CommentForm
     template_name = 'blog/comment.html'
-    success_url = reverse_lazy('blog:index')
+
+    def get_success_url(self):
+        post_id = self.kwargs.get('post_id')
+        return reverse('blog:post_detail', kwargs={'post_id': post_id})
 
     def get_object(self, queryset=None):
         comment_id = self.kwargs.get('comment_id')
